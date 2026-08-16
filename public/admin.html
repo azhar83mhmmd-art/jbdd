@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — ARRZ MARKET</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body class="admin-body">
+
+  <div class="admin-shell" data-admin-shell style="display:none;">
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar__logo">ARRZ MARKET</div>
+      <button class="admin-nav-link is-active" data-tab-btn="dashboard">Dashboard</button>
+      <button class="admin-nav-link" data-tab-btn="accounts">Akun</button>
+      <button class="admin-nav-link" data-tab-btn="offers">Tawaran</button>
+      <button class="admin-nav-link" data-tab-btn="sell-requests">Pengajuan Jual</button>
+      <button class="admin-nav-link" data-tab-btn="transactions">Transaksi</button>
+      <button class="admin-nav-link" data-tab-btn="categories">Kategori</button>
+      <button class="admin-nav-link" data-tab-btn="settings">Pengaturan</button>
+      <div class="admin-sidebar__spacer"></div>
+      <div class="admin-sidebar__logout">
+        <button class="admin-nav-link" data-logout-btn>Keluar</button>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <section data-tab-panel="dashboard">
+        <div class="admin-topbar"><h1>Dashboard</h1></div>
+        <div class="stat-grid" data-dashboard-stats>
+          <div class="stat-card"><div class="stat-card__label">Total Akun</div><div class="stat-card__value">—</div></div>
+          <div class="stat-card"><div class="stat-card__label">Tersedia</div><div class="stat-card__value">—</div></div>
+          <div class="stat-card"><div class="stat-card__label">Terjual</div><div class="stat-card__value">—</div></div>
+          <div class="stat-card"><div class="stat-card__label">Pengajuan Pending</div><div class="stat-card__value">—</div></div>
+          <div class="stat-card"><div class="stat-card__label">Tawaran Pending</div><div class="stat-card__value">—</div></div>
+          <div class="stat-card"><div class="stat-card__label">Total Transaksi</div><div class="stat-card__value">—</div></div>
+        </div>
+        <div class="admin-panel">
+          <div class="admin-panel__head"><h2>Selamat Datang</h2></div>
+          <p>Gunakan menu di samping untuk mengelola akun, tawaran, pengajuan jual, transaksi, kategori, dan pengaturan situs.</p>
+        </div>
+      </section>
+
+      <section data-tab-panel="accounts" style="display:none;">
+        <div class="admin-topbar">
+          <h1>Kelola Akun</h1>
+          <button class="btn btn-primary" data-open-account-drawer>+ Tambah Akun</button>
+        </div>
+        <div class="admin-panel">
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Foto</th><th>Kode</th><th>Nama</th><th>Platform</th><th>Harga</th><th>Status</th><th>Featured</th><th>Aksi</th></tr>
+              </thead>
+              <tbody data-accounts-table><tr><td colspan="8" class="admin-empty">Memuat...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section data-tab-panel="offers" style="display:none;">
+        <div class="admin-topbar"><h1>Tawaran Harga</h1></div>
+        <div class="tab-row" data-offers-filter>
+          <button class="tab-btn is-active" data-status="">Semua</button>
+          <button class="tab-btn" data-status="PENDING">Pending</button>
+          <button class="tab-btn" data-status="ACCEPTED">Diterima</button>
+          <button class="tab-btn" data-status="REJECTED">Ditolak</button>
+          <button class="tab-btn" data-status="COMPLETED">Selesai</button>
+        </div>
+        <div class="admin-panel">
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Akun</th><th>Harga Asli</th><th>Tawaran</th><th>Pembeli</th><th>WhatsApp</th><th>Status</th><th>Aksi</th></tr>
+              </thead>
+              <tbody data-offers-table><tr><td colspan="7" class="admin-empty">Memuat...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section data-tab-panel="sell-requests" style="display:none;">
+        <div class="admin-topbar"><h1>Pengajuan Jual Akun</h1></div>
+        <div class="tab-row" data-sell-requests-filter>
+          <button class="tab-btn is-active" data-status="">Semua</button>
+          <button class="tab-btn" data-status="PENDING">Pending</button>
+          <button class="tab-btn" data-status="REVIEW">Review</button>
+          <button class="tab-btn" data-status="ACCEPTED">Diterima</button>
+          <button class="tab-btn" data-status="REJECTED">Ditolak</button>
+        </div>
+        <div class="admin-panel">
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Nama Akun</th><th>Penjual</th><th>WhatsApp</th><th>Harga Diinginkan</th><th>Status</th><th>Aksi</th></tr>
+              </thead>
+              <tbody data-sell-requests-table><tr><td colspan="6" class="admin-empty">Memuat...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section data-tab-panel="transactions" style="display:none;">
+        <div class="admin-topbar"><h1>Transaksi</h1></div>
+        <div class="tab-row" data-transactions-filter>
+          <button class="tab-btn is-active" data-status="">Semua</button>
+          <button class="tab-btn" data-status="PENDING">Pending</button>
+          <button class="tab-btn" data-status="PROCESSING">Diproses</button>
+          <button class="tab-btn" data-status="COMPLETED">Selesai</button>
+          <button class="tab-btn" data-status="CANCELLED">Dibatalkan</button>
+        </div>
+        <div class="admin-panel">
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Akun</th><th>Pembeli</th><th>WhatsApp</th><th>Harga</th><th>Status</th><th>Aksi</th></tr>
+              </thead>
+              <tbody data-transactions-table><tr><td colspan="6" class="admin-empty">Memuat...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section data-tab-panel="categories" style="display:none;">
+        <div class="admin-topbar">
+          <h1>Kategori</h1>
+        </div>
+        <div class="admin-panel">
+          <form data-add-category-form style="display:flex; gap:10px; margin-bottom:20px;">
+            <input type="text" name="name" placeholder="Nama kategori baru" required style="flex:1;" />
+            <button type="submit" class="btn btn-primary">Tambah</button>
+          </form>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>Nama</th><th>Slug</th><th>Aksi</th></tr></thead>
+              <tbody data-categories-table><tr><td colspan="3" class="admin-empty">Memuat...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section data-tab-panel="settings" style="display:none;">
+        <div class="admin-topbar"><h1>Pengaturan Situs</h1></div>
+        <div class="admin-panel">
+          <form data-settings-form>
+            <div class="form-grid-2">
+              <div class="field">
+                <label for="set-site-name">Nama Situs</label>
+                <input type="text" id="set-site-name" name="site_name" />
+              </div>
+              <div class="field">
+                <label for="set-admin-wa">Nomor WhatsApp Admin</label>
+                <input type="text" id="set-admin-wa" name="admin_whatsapp" placeholder="6281234567890" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="set-footer">Teks Footer</label>
+              <input type="text" id="set-footer" name="footer_text" />
+            </div>
+            <h3 style="margin:22px 0 4px;">Template Pesan WhatsApp</h3>
+            <p style="font-size:0.85rem; margin-bottom:14px;">Gunakan placeholder seperti [NAMA AKUN], [HARGA], [NAMA], dst. Kosongkan untuk memakai template bawaan.</p>
+            <div class="field">
+              <label for="tpl-buy">Template Beli Sekarang</label>
+              <textarea id="tpl-buy" name="wa_template_buy" rows="6"></textarea>
+            </div>
+            <div class="field">
+              <label for="tpl-offer">Template Tawar Harga</label>
+              <textarea id="tpl-offer" name="wa_template_offer" rows="6"></textarea>
+            </div>
+            <div class="field">
+              <label for="tpl-sell">Template Jual Akun</label>
+              <textarea id="tpl-sell" name="wa_template_sell" rows="6"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Simpan Pengaturan</button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="admin-drawer-overlay" data-account-drawer>
+    <div class="admin-drawer">
+      <div class="admin-drawer__head">
+        <h2 data-drawer-title>Tambah Akun</h2>
+        <button class="modal__close" data-close-drawer aria-label="Tutup">✕</button>
+      </div>
+      <form data-account-form>
+        <input type="hidden" name="id" />
+        <div class="form-grid-2">
+          <div class="field">
+            <label for="acc-name">Nama Akun</label>
+            <input type="text" id="acc-name" name="name" required maxlength="200" />
+          </div>
+          <div class="field">
+            <label for="acc-platform">Platform</label>
+            <input type="text" id="acc-platform" name="platform" required maxlength="100" list="acc-platform-list" placeholder="Contoh: Mobile Legends" />
+            <datalist id="acc-platform-list">
+              <option value="Mobile Legends"></option>
+              <option value="Free Fire"></option>
+              <option value="PUBG"></option>
+              <option value="Genshin Impact"></option>
+              <option value="eFootball"></option>
+              <option value="Valorant"></option>
+              <option value="Instagram"></option>
+              <option value="Netflix"></option>
+            </datalist>
+            <span class="field__hint">Gunakan nama yang sama dengan filter platform di halaman Beli Akun agar akun mudah ditemukan.</span>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="field">
+            <label for="acc-category">Kategori</label>
+            <select id="acc-category" name="category_id"><option value="">Pilih kategori</option></select>
+          </div>
+          <div class="field">
+            <label for="acc-price">Harga (Rp)</label>
+            <input type="number" id="acc-price" name="price" required min="0" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="acc-username">Username / ID (opsional)</label>
+          <input type="text" id="acc-username" name="username" maxlength="200" />
+        </div>
+        <div class="field">
+          <label for="acc-desc">Deskripsi</label>
+          <textarea id="acc-desc" name="description" rows="3" maxlength="3000"></textarea>
+        </div>
+        <div class="field">
+          <label for="acc-details">Detail</label>
+          <textarea id="acc-details" name="details" rows="3" maxlength="3000"></textarea>
+        </div>
+        <div class="field">
+          <label for="acc-features">Fitur</label>
+          <textarea id="acc-features" name="features" rows="2" maxlength="3000"></textarea>
+        </div>
+        <div class="form-grid-2">
+          <div class="field">
+            <label for="acc-status">Status</label>
+            <select id="acc-status" name="status">
+              <option value="AVAILABLE">Available</option>
+              <option value="SOLD">Sold</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="checkbox-row" style="margin-top:30px;">
+              <input type="checkbox" name="featured" />
+              <span>Tandai sebagai Featured</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Foto Akun</label>
+          <div class="image-manage-grid" data-account-images></div>
+          <div class="dropzone" data-account-dropzone style="padding:16px;">
+            <input type="file" data-account-photo-input accept="image/jpeg,image/png,image/webp" multiple />
+            <p style="margin:0; font-weight:600; font-size:0.88rem;">Klik atau seret foto untuk menambah</p>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px;">Simpan Akun</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
