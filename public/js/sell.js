@@ -164,11 +164,10 @@
         status: 'PENDING',
       };
 
-      const { data: sellRequest, error } = await supabaseClient
-        .from('sell_requests')
-        .insert(payload)
-        .select('*')
-        .single();
+      // JANGAN .select() setelah insert: sell_requests tidak memberi
+      // anon/authenticated policy SELECT, jadi read-back akan gagal RLS
+      // walaupun insert-nya sendiri sah.
+      const { error } = await supabaseClient.from('sell_requests').insert(payload);
       if (error) throw error;
 
       let categoryName = '-';
@@ -198,7 +197,6 @@
       selectedFiles = [];
       renderPreviews();
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      void sellRequest;
     } catch (err) {
       ARRZ.toast(err.message, 'error');
     } finally {
