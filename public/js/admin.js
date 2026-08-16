@@ -129,6 +129,63 @@
     }
   }
 
+  // ══════════════════════════════════════════════════════════
+  // CARI AKUN (Dashboard) — cari lewat Kode Akun acak sistem
+  // (contoh: ARZ-7F3K9X), bukan lagi kode berurutan seperti ACC-00019.
+  // ══════════════════════════════════════════════════════════
+  const lookupForm = document.querySelector('[data-account-lookup-form]');
+  const lookupResult = document.querySelector('[data-account-lookup-result]');
+
+  lookupForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = lookupForm.querySelector('button[type="submit"]');
+    const rawCode = lookupForm.querySelector('[name="code"]').value.trim();
+    if (!rawCode) {
+      ARRZ.toast('Masukkan kode akun terlebih dahulu.', 'error');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Mencari...';
+    lookupResult.innerHTML = '';
+
+    try {
+      const { data, error } = await supabaseClient
+        .from('accounts')
+        .select('*, account_images(id, image_url, is_primary), categories(name)')
+        .ilike('account_code', rawCode)
+        .maybeSingle();
+      if (error) throw error;
+
+      if (!data) {
+        lookupResult.innerHTML = `<div class="admin-empty" style="padding:14px 0;">Akun dengan kode "${ARRZ.escapeAttr(rawCode)}" tidak ditemukan.</div>`;
+        return;
+      }
+
+      const primary = (data.account_images || []).find((i) => i.is_primary) || data.account_images?.[0];
+      lookupResult.innerHTML = `
+        <div class="admin-lookup-card">
+          ${primary ? `<img class="table-thumb" style="width:56px; height:56px;" src="${ARRZ.escapeAttr(primary.image_url)}" alt="" />` : `<div class="table-thumb" style="width:56px; height:56px;"></div>`}
+          <div style="flex:1; min-width:0;">
+            <div class="mono" style="font-weight:700;">${ARRZ.escapeAttr(data.account_code)}</div>
+            <div style="font-weight:600;">${ARRZ.escapeAttr(data.name)} — ${ARRZ.escapeAttr(data.platform)}</div>
+            <div style="font-size:0.85rem; color:var(--ink-soft);">${ARRZ.formatRupiah(data.price)} · <span class="badge ${data.status === 'SOLD' ? 'badge--sold' : 'badge--available'}">${data.status}</span></div>
+          </div>
+          <button type="button" class="btn btn-sm btn-primary" data-lookup-edit="${data.id}">Buka / Edit</button>
+        </div>`;
+
+      lookupResult.querySelector('[data-lookup-edit]')?.addEventListener('click', () => {
+        switchTab('accounts');
+        openAccountDrawer(data.id);
+      });
+    } catch (err) {
+      ARRZ.toast(err.message, 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Cari Akun';
+    }
+  });
+
   // ── Kategori cache (dipakai dropdown akun) ──────────────────
   async function loadCategoriesCache() {
     try {
@@ -151,6 +208,32 @@
   // AKUN
   // ══════════════════════════════════════════════════════════
 
+  let accountsCache = [];
+  const accountsSearchInput = document.querySelector('[data-accounts-table-search]');
+
+  function matchesAccountSearch(acc, query) {
+    if (!query) return true;
+    const q = query.trim().toLowerCase();
+    return (
+      (acc.account_code || '').toLowerCase().includes(q) ||
+      (acc.name || '').toLowerCase().includes(q) ||
+      (acc.username || '').toLowerCase().includes(q)
+    );
+  }
+
+  function renderAccountsTable(rows) {
+    const tbody = document.querySelector('[data-accounts-table]');
+    if (!rows || rows.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="admin-empty">Tidak ada akun yang cocok.</td></tr>`;
+      return;
+    }
+    renderAccountsRows(rows, tbody);
+  }
+
+  accountsSearchInput?.addEventListener('input', () => {
+    renderAccountsTable(accountsCache.filter((acc) => matchesAccountSearch(acc, accountsSearchInput.value)));
+  });
+
   async function loadAccountsTable() {
     const tbody = document.querySelector('[data-accounts-table]');
     tbody.innerHTML = `<tr><td colspan="8" class="admin-empty">Memuat...</td></tr>`;
@@ -162,11 +245,27 @@
         .limit(200);
       if (error) throw error;
 
+      accountsCache = all || [];
+
       if (!all || all.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" class="admin-empty">Belum ada akun. Klik "+ Tambah Akun" untuk memulai.</td></tr>`;
         return;
       }
 
+      const filtered = accountsSearchInput?.value
+        ? accountsCache.filter((acc) => matchesAccountSearch(acc, accountsSearchInput.value))
+        : accountsCache;
+
+      renderAccountsRows(filtered, tbody);
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="8" class="admin-empty">Data belum dapat dimuat. Silakan coba lagi.</td></tr>`;
+    }
+  }
+
+  // Dipisah dari loadAccountsTable supaya bisa dipakai ulang saat
+  // hasil pencarian (client-side filter) di-render tanpa fetch ulang.
+  function renderAccountsRows(all, tbody) {
+    try {
       tbody.innerHTML = all
         .map((acc) => {
           const primary = (acc.account_images || []).find((i) => i.is_primary) || acc.account_images?.[0];
