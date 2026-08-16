@@ -38,6 +38,15 @@
           <div class="stat-card"><div class="stat-card__label">Total Transaksi</div><div class="stat-card__value">—</div></div>
         </div>
         <div class="admin-panel">
+          <div class="admin-panel__head"><h2>Cari Akun</h2></div>
+          <p style="margin-top:-6px; margin-bottom:14px;">Masukkan Kode Akun yang dibuat otomatis oleh sistem (contoh: <span class="mono">ARZ-7F3K9X</span>) untuk langsung menemukan akun tersebut.</p>
+          <form data-account-lookup-form style="display:flex; gap:10px; flex-wrap:wrap;">
+            <input type="text" name="code" placeholder="Contoh: ARZ-7F3K9X" style="flex:1; min-width:220px; text-transform:uppercase;" autocomplete="off" />
+            <button type="submit" class="btn btn-primary">Cari Akun</button>
+          </form>
+          <div data-account-lookup-result style="margin-top:16px;"></div>
+        </div>
+        <div class="admin-panel">
           <div class="admin-panel__head"><h2>Selamat Datang</h2></div>
           <p>Gunakan menu di samping untuk mengelola akun, tawaran, pengajuan jual, transaksi, kategori, dan pengaturan situs.</p>
         </div>
@@ -49,6 +58,10 @@
           <button class="btn btn-primary" data-open-account-drawer>+ Tambah Akun</button>
         </div>
         <div class="admin-panel">
+          <div class="field" style="max-width:340px; margin-bottom:16px;">
+            <label for="acc-table-search">Cari (Kode Akun / Nama)</label>
+            <input type="text" id="acc-table-search" data-accounts-table-search placeholder="ARZ-7F3K9X atau nama akun" autocomplete="off" />
+          </div>
           <div class="admin-table-wrap">
             <table class="admin-table">
               <thead>
