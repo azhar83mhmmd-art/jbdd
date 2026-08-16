@@ -216,6 +216,17 @@
   background: var(--bg-raised);
 }
 
+/* ── Cari Akun (dashboard lookup) ── */
+.admin-lookup-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: var(--bg-raised);
+}
+
 /* ── Tabs (filter status) ── */
 .tab-row {
   display: flex;
