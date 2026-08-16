@@ -201,17 +201,18 @@
       const { available, data: acc } = await checkStatus();
       if (!available) throw new Error('Akun ini baru saja terjual. Silakan pilih akun lainnya.');
 
-      const { data: transaction, error } = await supabaseClient
-        .from('transactions')
-        .insert({
-          account_id: accountId,
-          buyer_name: name,
-          buyer_whatsapp: wa,
-          price: acc.price,
-          status: 'PENDING',
-        })
-        .select('*')
-        .single();
+      // Catatan penting: JANGAN .select() setelah insert di sini.
+      // Tabel transactions tidak memberi anon/authenticated policy SELECT
+      // (lihat migration_pure_supabase.sql), jadi mencoba membaca kembali
+      // baris yang baru dibuat akan memicu error RLS meskipun insert-nya
+      // sendiri sah. Insert saja, cukup andalkan `error` untuk tahu hasilnya.
+      const { error } = await supabaseClient.from('transactions').insert({
+        account_id: accountId,
+        buyer_name: name,
+        buyer_whatsapp: wa,
+        price: acc.price,
+        status: 'PENDING',
+      });
       if (error) throw error;
 
       const { adminNumber, templates } = await getWhatsappContext();
@@ -229,7 +230,6 @@
       closeModal(buyModal);
       ARRZ.toast('Berhasil! Kamu akan diarahkan ke WhatsApp admin.', 'success');
       buyForm.reset();
-      void transaction;
     } catch (err) {
       ARRZ.toast(err.message, 'error');
     } finally {
@@ -274,19 +274,17 @@
       const { available, data: acc } = await checkStatus();
       if (!available) throw new Error('Akun ini baru saja terjual. Silakan pilih akun lainnya.');
 
-      const { data: offer, error } = await supabaseClient
-        .from('offers')
-        .insert({
-          account_id: accountId,
-          original_price: acc.price,
-          offer_price: offerPrice,
-          buyer_name: name,
-          buyer_whatsapp: wa,
-          note,
-          status: 'PENDING',
-        })
-        .select('*')
-        .single();
+      // Sama seperti transactions: offers juga tidak memberi anon/authenticated
+      // policy SELECT, jadi insert saja tanpa .select().single().
+      const { error } = await supabaseClient.from('offers').insert({
+        account_id: accountId,
+        original_price: acc.price,
+        offer_price: offerPrice,
+        buyer_name: name,
+        buyer_whatsapp: wa,
+        note,
+        status: 'PENDING',
+      });
       if (error) throw error;
 
       const { adminNumber, templates } = await getWhatsappContext();
@@ -306,7 +304,6 @@
       closeModal(offerModal);
       ARRZ.toast('Tawaran terkirim! Kamu akan diarahkan ke WhatsApp admin.', 'success');
       offerForm.reset();
-      void offer;
     } catch (err) {
       ARRZ.toast(err.message, 'error');
     } finally {
