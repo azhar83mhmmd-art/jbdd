@@ -8,6 +8,9 @@
 -- 1. HAPUS AUTH LAMA (bcrypt manual) — diganti Supabase Auth
 drop table if exists admin_profiles cascade;
 
+-- Pastikan gen_random_uuid() tersedia (dipakai generator kode akun acak).
+create extension if not exists pgcrypto;
+
 -- 2. PROFILES — menyimpan role tiap user Supabase Auth
 create table if not exists profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -49,6 +52,54 @@ returns boolean as $$
     where id = auth.uid() and role = 'admin'
   );
 $$ language sql security definer stable;
+
+-- ============================================================
+-- 2B. KODE AKUN ACAK (bukan lagi sequential ACC-00001, ACC-00002, ...)
+-- Kode lama gampang ditebak urutannya (mis. ACC-00019 → tinggal
+-- tebak ACC-00020). Diganti kode acak 6 karakter, contoh: ARZ-7F3K9X.
+-- Dipakai juga oleh fitur "Cari Akun" admin.
+-- ============================================================
+create or replace function public.generate_account_code()
+returns text
+language plpgsql
+as $$
+declare
+  candidate text;
+  tries int := 0;
+begin
+  loop
+    candidate := 'ARZ-' || upper(substr(md5(gen_random_uuid()::text || clock_timestamp()::text), 1, 6));
+    exit when not exists (select 1 from public.accounts where account_code = candidate);
+    tries := tries + 1;
+    -- fallback super jarang: perpanjang kode kalau 20x tabrakan beruntun
+    if tries > 20 then
+      candidate := 'ARZ-' || upper(substr(md5(gen_random_uuid()::text || clock_timestamp()::text), 1, 10));
+      exit;
+    end if;
+  end loop;
+  return candidate;
+end;
+$$;
+
+create or replace function public.set_account_code()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.account_code is null or btrim(new.account_code) = '' then
+    new.account_code := public.generate_account_code();
+  end if;
+  return new;
+end;
+$$;
+
+-- Matikan default lama yang sequential (kolom tetap ada & terisi via trigger)
+alter table accounts alter column account_code drop default;
+
+drop trigger if exists trg_accounts_set_code on accounts;
+create trigger trg_accounts_set_code
+  before insert on accounts
+  for each row execute function public.set_account_code();
 
 -- ============================================================
 -- 3. RESET SEMUA POLICY LAMA (biar tidak dobel saat re-run)
@@ -195,9 +246,12 @@ end $$;
 
 -- ============================================================
 -- 12. STORAGE — bucket account-images + policy
--- Publik boleh insert (form Jual Akun & Tambah Akun admin sama-sama
--- upload langsung dari browser, persis seperti /api/uploads dulu yang
--- tidak mewajibkan login). Hanya admin yang boleh hapus foto.
+-- Struktur folder wajib:
+--   account-images/accounts/{account_id}/...      → khusus ADMIN
+--   account-images/sell-requests/{id-or-random}/.. → publik (form Jual Akun)
+-- Sebelumnya kebijakan insert tidak membatasi folder sama sekali,
+-- artinya user publik bisa saja menulis ke folder accounts/ milik
+-- admin. Sekarang dibatasi per-folder pakai storage.foldername(name).
 -- ============================================================
 insert into storage.buckets (id, name, public)
 values ('account-images', 'account-images', true)
@@ -207,13 +261,36 @@ drop policy if exists "Publik baca account-images" on storage.objects;
 drop policy if exists "Admin upload account-images" on storage.objects;
 drop policy if exists "Publik upload account-images" on storage.objects;
 drop policy if exists "Admin hapus account-images" on storage.objects;
+drop policy if exists "Publik upload sell-requests" on storage.objects;
+drop policy if exists "Admin upload accounts" on storage.objects;
+drop policy if exists "Admin update account-images storage" on storage.objects;
 
+-- Baca: publik (bucket sudah public juga, policy ini untuk kejelasan RLS)
 create policy "Publik baca account-images" on storage.objects
   for select using (bucket_id = 'account-images');
 
-create policy "Publik upload account-images" on storage.objects
-  for insert with check (bucket_id = 'account-images');
+-- Insert: publik HANYA boleh menulis ke folder sell-requests/
+create policy "Publik upload sell-requests" on storage.objects
+  for insert with check (
+    bucket_id = 'account-images'
+    and (storage.foldername(name))[1] = 'sell-requests'
+  );
 
+-- Insert: admin HANYA (biasanya) menulis ke folder accounts/, tapi tetap
+-- diberi akses insert ke folder lain juga (mis. saat convert sell-request)
+create policy "Admin upload accounts" on storage.objects
+  for insert with check (
+    bucket_id = 'account-images'
+    and public.is_admin()
+  );
+
+-- Update: hanya admin (mis. ganti/replace foto)
+create policy "Admin update account-images storage" on storage.objects
+  for update using (bucket_id = 'account-images' and public.is_admin())
+  with check (bucket_id = 'account-images' and public.is_admin());
+
+-- Delete: hanya admin — user publik tidak boleh hapus foto siapa pun,
+-- termasuk foto miliknya sendiri di sell-requests/.
 create policy "Admin hapus account-images" on storage.objects
   for delete using (bucket_id = 'account-images' and public.is_admin());
 
